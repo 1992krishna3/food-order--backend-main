@@ -25,10 +25,12 @@ export const signup = async (req, res) => {
       if (userExist) {
         return res.status(400).json({message:"User is already exist"});
       }
-      
+
+      // Hash the password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-  
+
+      // Create new user
       const newUser = new User({
         email,
         firstName,
@@ -48,6 +50,11 @@ export const signup = async (req, res) => {
       const token = generateToken(newUser._id,newUser.role);
       console.log('Generated Token:', token);
     
+      // Store token in a cookie
+      res.cookie('token',token, {
+        httponly:true,
+      })
+
       res.status(201).json({message: "Signed successfully!",token});
     } catch (error) {
       console.log(error);
@@ -82,6 +89,11 @@ export const signup = async (req, res) => {
       // Generate JWT token
       const token = generateToken(user._id,user.role);
       console.log('Generated Token:', token)
+
+      // Store token in a cookie
+      res.cookie('token',token, {
+        httponly:true,
+      })
       
       res.status(201).json({message:"signin successful", token});
     } catch (error) {
