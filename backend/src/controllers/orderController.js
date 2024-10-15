@@ -4,19 +4,20 @@ import Razorpay from "razorpay";
 
 //Create a new order
 export const createOrder = async (req, res) => {
-    const { restaurant, items, total } = req.body;
+    
     try {
         const newOrder = new Order({
             userId: req.body.userId,
             items:req.body.items,
-            amount:req.body.amount,
-            address:req.body.address
+            totalAmount:req.body.amount,
+            Address:req.body.address
        });
     
 
        const order = await newOrder.save();
-    res.json(order);
+    res.status(201).json(order);
   } catch (err) {
+    console.error('Error creating order:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 };
@@ -24,8 +25,14 @@ export const createOrder = async (req, res) => {
 //Get all orders
 export const getOrders= async (req, res) => {
     try {
-        const orders =await Order.find({ user: req.user.id }).populate('items.food');
-        res.json(orders);  
+
+        // Ensure the user ID is available from the decoded token
+    const userId = req.user.id;
+    console.log('Fetching orders for User ID:', userId);
+
+        const orders =await Order.find({ userId }).populate('items.food');
+        console.log('Fetched orders:', orders);
+        res.status(200).json(orders);  
     } catch (err) {
         res.status(500).json({ msg: 'Server error' });
     }
